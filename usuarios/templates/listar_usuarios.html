@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<html>
+    <body> 
+        <main>
+            <div class="container py-4">
+                <div class="p-5 mb-4 bg-light rounded-3">
+                    <div class="container-fluid py-5">
+                        <h1 class="display-5 fw-bold">Usuarios</h1>
+                        <p class="col-md-8 fs-4">Hola {{request.user.username}}, aqui podras consultar los usuarios registrados en el sistema y actualizar su informacion personal y algunas credenciales.</p>
+
+                        <div class="container py-4">
+                            <div class="h-200 p-5 bg-light border rounded-3">
+                                <h2>Usuarios registrados</h2>
+                                {% if messages %}
+                                    {% for message in messages %}
+                                    <div class="alert alert-{{ message.tags }}">
+                                        {{ message }}
+                                    </div>
+                                    {% endfor %}
+                                {% endif %}
+                                    <form method="GET" action="{% url 'listar_usuarios' %}" class="row g-2 mb-4">
+                                        <div class="col-md-5">
+                                            <input
+                                                type="text"
+                                                name="q"
+                                                value="{{ busqueda }}"
+                                                class="form-control"
+                                                placeholder="Buscar por nombre de usuario">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <select name="tipo" class="form-select">
+                                                <option value="" {% if not tipo %}selected{% endif %}>Todos</option>
+                                                <option value="empleados" {% if tipo == 'empleados' %}selected{% endif %}>Solo empleados</option>
+                                                <option value="clientes" {% if tipo == 'clientes' %}selected{% endif %}>Solo clientes</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4 d-flex gap-2">
+                                            <button class="btn btn-primary" type="submit">Buscar</button>
+                                            {% if busqueda or tipo %}
+                                                <a href="{% url 'listar_usuarios' %}" class="btn btn-outline-secondary">Limpiar</a>
+                                            {% endif %}
+                                        </div>
+                                    </form>
+                                    {% if busqueda or tipo %}
+                                        <p class="text-muted">Resultados encontrados: {{ usuarios|length }}</p>
+                                    {% endif %}
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Usuario</th>
+                                                <th>Nombre</th>
+                                                <th>Email</th>
+                                                <th>Tipo</th>
+                                                <th>Estado</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody>
+
+                                            {% for usuario in usuarios %}
+
+                                            <tr>
+                                                <td>{{ usuario.user_id }}</td>
+                                                <td>{{ usuario.username }}</td>
+                                                <td>{{ usuario.first_name }} {{ usuario.last_name }}</td>
+                                                <td>{{ usuario.email }}</td>
+                                                <td>
+                                                    {% if usuario.is_staff %}
+                                                        <span class="badge bg-primary">
+                                                            Empleado
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="badge bg-info text-dark">
+                                                            Cliente
+                                                        </span>
+                                                    {% endif %}
+                                                </td>
+
+                                                <td>
+                                                    {% if usuario.is_active %}
+                                                        <span class="badge bg-success">
+                                                            Activo
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="badge bg-danger">
+                                                            Inactivo
+                                                        </span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <a
+                                                        href="{% url 'modificar_usuario' usuario.user_id %}"
+                                                        class="btn btn-warning btn-sm">
+                                                        Modificar
+                                                    </a>
+
+                                                    {% if usuario.is_active %}
+
+                                                        <a
+                                                            href="{% url 'cambiar_estado_usuario' usuario.user_id %}"
+                                                            class="btn btn-danger btn-sm"
+                                                            onclick="return confirm('¿Desea inactivar este usuario?');">
+
+                                                            Inactivar
+
+                                                        </a>
+
+                                                    {% else %}
+
+                                                        <a
+                                                            href="{% url 'cambiar_estado_usuario' usuario.user_id %}"
+                                                            class="btn btn-success btn-sm"
+                                                            onclick="return confirm('¿Desea activar este usuario?');">
+
+                                                            Activar
+
+                                                        </a>
+
+                                                    {% endif %}
+
+                                                    {% if request.user.is_staff %}
+
+                                                        <form
+                                                            method="POST"
+                                                            action="{% url 'eliminar_usuario' usuario.user_id %}"
+                                                            class="d-inline"
+                                                            onsubmit="return confirm('¿Desea eliminar permanentemente al usuario {{ usuario.username|escapejs }}? Esta acción no se puede deshacer.');">
+
+                                                            {% csrf_token %}
+
+                                                            <button type="submit" class="btn btn-dark btn-sm">
+                                                                Eliminar
+                                                            </button>
+
+                                                        </form>
+
+                                                    {% endif %}
+
+                                                </td>
+
+                                            </tr>
+
+                                            {% empty %}
+
+                                            <tr>
+                                                <td colspan="7" class="text-center text-muted">
+                                                    No se encontraron usuarios.
+                                                </td>
+                                            </tr>
+
+                                            {% endfor %}
+
+                                        </tbody>
+
+                                    </table>
+                                
+                            </div>
+                        </div>
+
+                    
+                    </div>
+                </div>
+            </div>
+        </main>
+    </body>
+</html>
+
+{% endblock %}
+                        
+
+<!--
+
+<h2>Usuarios registrados</h2>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Usuario</th>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        {% for usuario in usuarios %}
+
+        <tr>
+            <td>{{ usuario.user_id }}</td>
+            <td>{{ usuario.username }}</td>
+            <td>{{ usuario.first_name }} {{ usuario.last_name }}</td>
+            <td>{{ usuario.email }}</td>
+
+            <td>
+                {% if usuario.is_active %}
+                    Activo
+                {% else %}
+                    Inactivo
+                {% endif %}
+            </td>
+
+            <td>
+
+                <a
+                    href="{% url 'modificar_usuario' usuario.user_id %}"
+                    class="btn btn-warning">
+
+                    Modificar
+
+                </a>
+
+            </td>
+
+        </tr>
+
+        {% endfor %}
+
+    </tbody>
+
+</table>
+
+
+
+-->
