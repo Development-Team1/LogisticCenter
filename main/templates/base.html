@@ -1,45 +1,41 @@
 {% load static %}
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title></title>
+    <title>{% block title %}Logistic Center{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 </head>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 <body>
-        <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
-            <div class="container-fluid">
-                <a class="navbar-brand" href="/">
-                    <img src="{% static 'img/imagotipo_horizontal_v1.png' %}" alt="" width="130" height="70" class="d-inline-block align-text-center">
-                    
-                    </a>
-                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'bienvenida' %}">
+                <img src="{% static 'img/imagotipo_horizontal_v1.png' %}" alt="Logistic Center" width="130" height="70" class="d-inline-block align-text-center">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav">
-
                     {% if user.is_authenticated %}
-                    <li class="nav-item">
-                    <a class="nav-link" href="/dashboard">Dashboard</a>
-                    </li>
-                    <li class="nav-item">
-                    <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Inventario</a>
-                    </li>
-                    <li class="nav-item">
-                    <a class="nav-link" href="/logout">Cerrar sesion</a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'catalogo' %}">Catálogo</a></li>
+                    {% if user.is_staff %}
+                    <li class="nav-item"><a class="nav-link" href="{% url 'listar_productos' %}">Productos</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'listar_proveedores' %}">Proveedores</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'listar_usuarios' %}">Usuarios</a></li>
                     {% endif %}
-        </ul>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}">Cerrar sesión</a></li>
+                    {% endif %}
+                </ul>
+            </div>
         </div>
-    </div>
     </nav>
 
     {% block content %}
-    {% endblock %}  
+    {% endblock %}
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-

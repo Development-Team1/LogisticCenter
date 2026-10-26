@@ -1,63 +1,61 @@
 {% extends 'base.html' %}
 {% load static %}
+{% block title %}Dashboard{% endblock %}
 
 {% block content %}
+<main>
+    <div class="container py-4">
+        <div class="p-5 mb-4 bg-light rounded-3">
+            <div class="container-fluid py-5">
+                <h1 class="display-5 fw-bold">Dashboard</h1>
+                <p class="col-md-8 fs-4">Hola {{ request.user.username }}, Bienvenido a tu pagina principal de logistic center, aqui encontraras los servicios que tenemos para ofrecerte.</p>
+            </div>
+        </div>
 
-<html>
-    <body> 
-        <main>
-            <div class="container py-4">
-                <div class="p-5 mb-4 bg-light rounded-3">
-                    <div class="container-fluid py-5">
-                        <h1 class="display-5 fw-bold">Dashboard</h1>
-                        <p class="col-md-8 fs-4">Hola {{request.user.username}}, Bienvenido a tu pagina principal de logistic center, aqui encontraras los servicios que tenemos para ofrecerte.</p>
+        {% if request.user.is_staff %}
+        <!--Administradores-->
+        <div class="row align-items-md-stretch mb-4">
+            <div class="col-md-12">
+                <div class="h-100 p-5 text-white bg-dark rounded-3">
+                    <h2>Usuarios y clientes</h2>
+                    <p>Registra, consulta y actualiza los datos personales y las credenciales de empleados, administradores y clientes.</p>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a class="btn btn-outline-light" href="{% url 'registro' %}">Registrar usuario</a>
+                        <a class="btn btn-outline-light" href="{% url 'listar_usuarios' %}">Lista de usuarios</a>
+                        <a class="btn btn-outline-light" href="{% url 'listar_usuarios' %}?tipo=clientes">Clientes</a>
                     </div>
                 </div>
-                {% if request.user.is_staff %}
-                    <!--Administradores-->
-                    <div class="row align-items-md-stretch">
-                        <div class="col-md-12">
-                            <div class="h-100 p-5 text-white bg-dark rounded-3">
-                                <h2>Usuarios</h2>
-                                <p>Registra, consulta y actualiza los datos personales y las credenciales laborales de los empleados o administradores en el sistema.</p>
-                                <div class="d-flex gap-2">
-                                    <a href="{% url 'registro' %}">
-                                        <button class="btn btn-outline-light" type="button">Registrar usuario</button>
-                                    </a>
-                                    <a href="{% url 'listar_usuarios' %}">
-                                        <button class="btn btn-outline-light" type="button">Lista de usuarios</button>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                {% endif %}
-                    <!--Empleados-->
-                    <div class="container py-4">
-                        <div class="row align-items-md-stretch">
-                            <div class="col-md-6">
-                                <div class="h-100 p-5 bg-light border rounded-3">
-                                    <h2>Inventario</h2>
-                                    <p>Modifica, actualiza y consulta productos del inventario.</p>
-                                    <button class="btn btn-outline-secondary" type="button">Example button</button>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="h-100 p-5 bg-light border rounded-3">
-                                    <h2>Ventas</h2>
-                                    <p>Consulta las graficas, el balance y la contabilidad de la empresa.</p>
-                                    <button class="btn btn-outline-secondary" type="button">Example button</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
             </div>
-                <footer class="pt-3 mt-4 text-muted border-top">
-                &copy; Logistic center S.A.S 2026
-                </footer>
-            </div>
-        </main>
-  </body>
-</html>
+        </div>
+        {% endif %}
 
+        <div class="row align-items-md-stretch g-4">
+            <div class="col-md-6">
+                <div class="h-100 p-5 bg-light border rounded-3">
+                    <h2>Inventario</h2>
+                    <p>Consulta el catálogo{% if request.user.is_staff %} y gestiona proveedores, productos y categorías{% endif %}.</p>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a class="btn btn-outline-secondary" href="{% url 'catalogo' %}">Catálogo</a>
+                        {% if request.user.is_staff %}
+                        <a class="btn btn-outline-secondary" href="{% url 'listar_productos' %}">Productos</a>
+                        <a class="btn btn-outline-secondary" href="{% url 'listar_proveedores' %}">Proveedores</a>
+                        <a class="btn btn-outline-secondary" href="{% url 'categorias' %}">Categorías</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="h-100 p-5 bg-light border rounded-3">
+                    <h2>Ventas</h2>
+                    <p>Consulta las graficas, el balance y la contabilidad de la empresa.</p>
+                    <button class="btn btn-outline-secondary" type="button" disabled>Próximamente</button>
+                </div>
+            </div>
+        </div>
+
+        <footer class="pt-3 mt-4 text-muted border-top">
+            &copy; Logistic center S.A.S 2026
+        </footer>
+    </div>
+</main>
 {% endblock %}

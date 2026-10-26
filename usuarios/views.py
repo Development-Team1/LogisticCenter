@@ -108,6 +108,15 @@ def ModificarUsuarioView(request, user_id):
         user_id=user_id
     )
 
+    if usuario.is_superuser and not request.user.is_superuser:
+
+        messages.warning(
+            request,
+            'No tiene permisos para modificar a un superusuario.'
+        )
+
+        return redirect('listar_usuarios')
+
     if request.method == 'POST':
 
         form = ModificarUsuarioForm(

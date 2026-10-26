@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}Proveedores{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="p-4 mb-4 bg-light rounded-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+            <h1 class="h2 fw-bold mb-1">Proveedores</h1>
+            <p class="mb-0 text-muted">Consulta, registra, modifica y elimina los proveedores del sistema.</p>
+        </div>
+        <a href="{% url 'registrar_proveedor' %}" class="btn btn-primary">Registrar proveedor</a>
+    </div>
+
+    {% include 'inventario/_mensajes.html' %}
+
+    <form method="GET" class="row g-2 mb-3">
+        <div class="col-md-6">
+            <input type="text" name="q" value="{{ busqueda }}" class="form-control"
+                   placeholder="Buscar por nombre o NIT">
+        </div>
+        <div class="col-md-6 d-flex gap-2">
+            <button class="btn btn-primary" type="submit">Buscar</button>
+            {% if busqueda %}
+                <a href="{% url 'listar_proveedores' %}" class="btn btn-outline-secondary">Limpiar</a>
+            {% endif %}
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Nombre</th><th>NIT</th><th>Contacto</th><th>Teléfono</th>
+                    <th>Correo</th><th>Productos</th><th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for proveedor in proveedores %}
+                <tr>
+                    <td>{{ proveedor.nombre }}</td>
+                    <td>{{ proveedor.nit }}</td>
+                    <td>{{ proveedor.contacto }}</td>
+                    <td>{{ proveedor.telefono }}</td>
+                    <td>{{ proveedor.email }}</td>
+                    <td><span class="badge bg-secondary">{{ proveedor.total_productos }}</span></td>
+                    <td class="text-nowrap">
+                        <a href="{% url 'modificar_proveedor' proveedor.pk %}" class="btn btn-warning btn-sm">Modificar</a>
+                        <form method="POST" action="{% url 'eliminar_proveedor' proveedor.pk %}" class="d-inline"
+                              onsubmit="return confirm('¿Desea eliminar permanentemente a {{ proveedor.nombre|escapejs }}?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-dark btn-sm">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="text-center text-muted">No se encontraron proveedores.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

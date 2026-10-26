@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 
+from django.contrib.messages import constants as message_constants
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -38,7 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'usuarios',
-    'main'
+    'main',
+    'inventario',
 ]
 
 AUTH_USER_MODEL = 'usuarios.Usuario'
@@ -46,6 +49,9 @@ AUTH_USER_MODEL = 'usuarios.Usuario'
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL  = 'bienvenida'
+
+# Para que los mensajes de error usen la clase alert-danger de Bootstrap
+MESSAGE_TAGS = {message_constants.ERROR: 'danger'}
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 

@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Categorías{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="p-4 mb-4 bg-light rounded-3">
+        <h1 class="h2 fw-bold mb-1">Categorías</h1>
+        <p class="mb-0 text-muted">Crea las categorías que luego se asignan a los productos.</p>
+    </div>
+
+    {% include 'inventario/_mensajes.html' %}
+
+    <div class="row g-4">
+        <div class="col-md-5">
+            <div class="p-4 bg-white border rounded-3">
+                <h2 class="h5 mb-3">Nueva categoría</h2>
+                <form method="POST">
+                    {% csrf_token %}
+                    {% for campo in form %}
+                    <div class="mb-3">
+                        <label class="form-label" for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+                        {{ campo }}
+                        {% for error in campo.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                    </div>
+                    {% endfor %}
+                    <button type="submit" class="btn btn-primary">Crear</button>
+                    <a href="{% url 'listar_productos' %}" class="btn btn-outline-secondary">Volver a productos</a>
+                </form>
+            </div>
+        </div>
+        <div class="col-md-7">
+            <table class="table align-middle">
+                <thead><tr><th>Nombre</th><th>Descripción</th><th>Productos</th><th></th></tr></thead>
+                <tbody>
+                    {% for categoria in categorias %}
+                    <tr>
+                        <td>{{ categoria.nombre }}</td>
+                        <td>{{ categoria.descripcion }}</td>
+                        <td><span class="badge bg-secondary">{{ categoria.total_productos }}</span></td>
+                        <td>
+                            <form method="POST" action="{% url 'eliminar_categoria' categoria.pk %}"
+                                  onsubmit="return confirm('¿Eliminar la categoría {{ categoria.nombre|escapejs }}? Los productos no se borran.');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-dark btn-sm">Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4" class="text-center text-muted">Aún no hay categorías.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
