@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Registrar {{ cfg.singular }} · Logistic Center{% endblock %}
+{% block page_class %}page--narrow{% endblock %}
+
+{% block content %}
+<nav class="crumbs" aria-label="Ruta">
+    <a href="{% url cfg.url_lista %}">{{ cfg.titulo_plural }}</a><span aria-hidden="true">›</span><span>Registrar {{ cfg.singular }}</span>
+</nav>
+
+<section class="card form-card">
+    <header class="form-card__head">
+        <span class="avatar" aria-hidden="true"><svg class="icon" style="width:22px;height:22px"><use href="#i-user-plus"/></svg></span>
+        <div>
+            <h1>Registrar {{ cfg.singular }}</h1>
+            <p>Crea la cuenta y los datos de un {{ cfg.singular }}. Los campos con * son obligatorios.</p>
+        </div>
+    </header>
+
+    <form method="post" novalidate>
+        {% include '_form_persona.html' %}
+        <div class="form-actions">
+            <a class="btn btn--outline" href="{% url cfg.url_lista %}">Cancelar</a>
+            <button class="btn btn--primary" type="submit">Registrar {{ cfg.singular }}</button>
+        </div>
+    </form>
+</section>
+{% endblock %}

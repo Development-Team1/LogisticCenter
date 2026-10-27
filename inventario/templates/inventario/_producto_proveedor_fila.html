@@ -1,0 +1,15 @@
+<fieldset class="product-row" data-fila>
+    <legend>Producto <span data-numero>{{ numero }}</span></legend>
+    <button class="btn btn--ghost btn--sm product-row__remove" type="button" data-quitar-producto>Quitar</button>
+    {{ f.id }}
+    {% if f.non_field_errors %}<div class="form-alert" style="margin-top:0;margin-bottom:12px;">{{ f.non_field_errors }}</div>{% endif %}
+    <div class="field-row">
+        {% include 'components/campo.html' with campo=f.codigo %}
+        {% include 'components/campo.html' with campo=f.nombre %}
+    </div>
+    <div class="field-row">
+        {% include 'components/campo.html' with campo=f.marca %}
+        {% include 'components/campo.html' with campo=f.unidad_medida %}
+    </div>
+    {% include 'components/campo.html' with campo=f.descripcion %}
+</fieldset>

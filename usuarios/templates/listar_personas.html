@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}{{ cfg.titulo_plural }} · Logistic Center{% endblock %}
+
+{% block content %}
+<nav class="crumbs" aria-label="Ruta">
+    <a href="{% url 'dashboard' %}">Inicio</a><span aria-hidden="true">›</span><span>{{ cfg.titulo_plural }}</span>
+</nav>
+
+<div class="page-head">
+    <h1 class="page-title">{{ cfg.titulo_plural }} registrados</h1>
+    <a class="btn btn--primary btn--lg" href="{% url cfg.url_registro %}">+ Registrar {{ cfg.singular }}</a>
+</div>
+
+<form method="get" action="{% url cfg.url_lista %}" class="toolbar" role="search">
+    <input class="input" type="search" name="q" value="{{ busqueda }}" placeholder="Buscar por usuario, nombre, correo o documento" aria-label="Buscar {{ cfg.plural }}">
+    <button class="btn btn--outline" type="submit">Buscar</button>
+    {% if busqueda %}<a class="btn btn--ghost" href="{% url cfg.url_lista %}">Limpiar</a>{% endif %}
+</form>
+
+<div class="table-card">
+    <div class="table-wrap">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Usuario</th>
+                    <th scope="col">Nombre</th>
+                    <th scope="col">Documento</th>
+                    <th scope="col">Teléfono</th>
+                    <th scope="col">{% if tipo == 'empleado' %}Cargo{% else %}Ciudad{% endif %}</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Estado</th>
+                    <th scope="col">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for usuario in personas %}
+                {% if tipo == 'empleado' %}{% with perfil=usuario.empleado %}
+                {% include '_fila_persona.html' %}
+                {% endwith %}{% else %}{% with perfil=usuario.cliente %}
+                {% include '_fila_persona.html' %}
+                {% endwith %}{% endif %}
+                {% empty %}
+                <tr><td colspan="8" class="cell-empty">No se encontraron {{ cfg.plural }}.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<p class="table-foot">Mostrando {{ personas|length }} de {{ total }} {{ cfg.plural }}</p>
+{% endblock %}
+
+{% block modals %}
+{% include 'components/modal_eliminar.html' %}
+{% include 'components/modal_estado.html' %}
+{% endblock %}

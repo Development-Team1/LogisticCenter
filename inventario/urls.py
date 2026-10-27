@@ -6,8 +6,12 @@ urlpatterns = [
     # Proveedores
     path('proveedores/', views.ListarProveedoresView, name='listar_proveedores'),
     path('proveedores/registrar/', views.RegistrarProveedorView, name='registrar_proveedor'),
+    path('proveedores/<int:pk>/', views.DetalleProveedorView, name='detalle_proveedor'),
     path('proveedores/<int:pk>/modificar/', views.ModificarProveedorView, name='modificar_proveedor'),
     path('proveedores/<int:pk>/eliminar/', views.EliminarProveedorView, name='eliminar_proveedor'),
+
+    path('lista-proveedor/<int:pk>/modificar/', views.ModificarProductoProveedorView, name='modificar_producto_proveedor'),
+    path('lista-proveedor/<int:pk>/eliminar/', views.EliminarProductoProveedorView, name='eliminar_producto_proveedor'),
 
     # Categorías
     path('categorias/', views.CategoriasView, name='categorias'),

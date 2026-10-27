@@ -1,0 +1,50 @@
+{# Cuerpo común del formulario de empleados y clientes. Recibe: form, tipo, cfg, modificar (opcional). #}
+{% csrf_token %}
+{% if form.non_field_errors %}<div class="form-alert">{{ form.non_field_errors }}</div>{% endif %}
+
+<section class="section" aria-labelledby="sec-cuenta">
+    <h2 class="section__title" id="sec-cuenta">Cuenta</h2>
+    {% include 'components/campo.html' with campo=form.username hint="Hasta 150 caracteres. Solo letras, números y @ . + - _" %}
+    {% if modificar %}
+        {% include 'components/campo.html' with campo=form.password %}
+    {% else %}
+        <div class="field-row">
+            {% include 'components/campo.html' with campo=form.password1 %}
+            {% include 'components/campo.html' with campo=form.password2 %}
+        </div>
+    {% endif %}
+</section>
+
+<section class="section" aria-labelledby="sec-datos">
+    <h2 class="section__title" id="sec-datos">Datos personales</h2>
+    <div class="field-row">
+        {% include 'components/campo.html' with campo=form.first_name %}
+        {% include 'components/campo.html' with campo=form.last_name %}
+    </div>
+    <div class="field-row">
+        {% include 'components/campo.html' with campo=form.tipo_documento %}
+        {% include 'components/campo.html' with campo=form.numero_documento %}
+    </div>
+    {% include 'components/campo.html' with campo=form.email %}
+</section>
+
+<section class="section" aria-labelledby="sec-contacto">
+    <h2 class="section__title" id="sec-contacto">Contacto{% if tipo == 'empleado' %} y cargo{% endif %}</h2>
+    <div class="field-row">
+        {% include 'components/campo.html' with campo=form.telefono %}
+        {% include 'components/campo.html' with campo=form.campo_extra %}
+    </div>
+    {% include 'components/campo.html' with campo=form.direccion %}
+</section>
+
+<section class="section" aria-labelledby="sec-rol">
+    <h2 class="section__title" id="sec-rol">Rol y estado</h2>
+    {% include 'components/campo.html' with campo=form.tipo_usuario hint="El tipo de usuario lo define esta sección y no se puede cambiar." %}
+    <label class="switch-row" for="{{ form.is_active.id_for_label }}">
+        <span class="switch-row__text">
+            <strong>Usuario activo</strong>
+            <span>Desactívalo en lugar de borrar la cuenta.</span>
+        </span>
+        {{ form.is_active }}
+    </label>
+</section>

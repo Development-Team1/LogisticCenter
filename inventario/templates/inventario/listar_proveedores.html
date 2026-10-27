@@ -1,62 +1,78 @@
 {% extends 'base.html' %}
-{% block title %}Proveedores{% endblock %}
+{% block title %}Proveedores · Logistic Center{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="p-4 mb-4 bg-light rounded-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
-        <div>
-            <h1 class="h2 fw-bold mb-1">Proveedores</h1>
-            <p class="mb-0 text-muted">Consulta, registra, modifica y elimina los proveedores del sistema.</p>
-        </div>
-        <a href="{% url 'registrar_proveedor' %}" class="btn btn-primary">Registrar proveedor</a>
-    </div>
+<nav class="crumbs" aria-label="Ruta">
+    <a href="{% url 'dashboard' %}">Inicio</a><span aria-hidden="true">›</span><span>Proveedores</span>
+</nav>
 
-    {% include 'inventario/_mensajes.html' %}
+<div class="page-head">
+    <h1 class="page-title">Proveedores</h1>
+    <a class="btn btn--primary btn--lg" href="{% url 'registrar_proveedor' %}">+ Registrar proveedor</a>
+</div>
 
-    <form method="GET" class="row g-2 mb-3">
-        <div class="col-md-6">
-            <input type="text" name="q" value="{{ busqueda }}" class="form-control"
-                   placeholder="Buscar por nombre o NIT">
-        </div>
-        <div class="col-md-6 d-flex gap-2">
-            <button class="btn btn-primary" type="submit">Buscar</button>
-            {% if busqueda %}
-                <a href="{% url 'listar_proveedores' %}" class="btn btn-outline-secondary">Limpiar</a>
-            {% endif %}
-        </div>
-    </form>
+{% if proveedores or busqueda %}
+<form method="get" class="toolbar" role="search">
+    <input class="input" type="search" name="q" value="{{ busqueda }}" placeholder="Buscar por nombre o NIT" aria-label="Buscar por nombre o NIT">
+    <button class="btn btn--outline" type="submit">Buscar</button>
+    {% if busqueda %}<a class="btn btn--ghost" href="{% url 'listar_proveedores' %}">Limpiar</a>{% endif %}
+</form>
 
-    <div class="table-responsive">
-        <table class="table align-middle">
+<div class="table-card">
+    <div class="table-wrap">
+        <table class="table">
             <thead>
                 <tr>
-                    <th>Nombre</th><th>NIT</th><th>Contacto</th><th>Teléfono</th>
-                    <th>Correo</th><th>Productos</th><th>Acciones</th>
+                    <th scope="col">Nombre</th>
+                    <th scope="col">NIT</th>
+                    <th scope="col">Teléfono</th>
+                    <th scope="col">Correo</th>
+                    <th scope="col">Productos</th>
+                    <th scope="col">Acciones</th>
                 </tr>
             </thead>
             <tbody>
                 {% for proveedor in proveedores %}
                 <tr>
-                    <td>{{ proveedor.nombre }}</td>
+                    <td><a class="link-strong" href="{% url 'detalle_proveedor' proveedor.pk %}">{{ proveedor.nombre }}</a></td>
                     <td>{{ proveedor.nit }}</td>
-                    <td>{{ proveedor.contacto }}</td>
                     <td>{{ proveedor.telefono }}</td>
                     <td>{{ proveedor.email }}</td>
-                    <td><span class="badge bg-secondary">{{ proveedor.total_productos }}</span></td>
-                    <td class="text-nowrap">
-                        <a href="{% url 'modificar_proveedor' proveedor.pk %}" class="btn btn-warning btn-sm">Modificar</a>
-                        <form method="POST" action="{% url 'eliminar_proveedor' proveedor.pk %}" class="d-inline"
-                              onsubmit="return confirm('¿Desea eliminar permanentemente a {{ proveedor.nombre|escapejs }}?');">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-dark btn-sm">Eliminar</button>
-                        </form>
+                    <td><a class="pill pill--gray" href="{% url 'detalle_proveedor' proveedor.pk %}" title="Ver lista de productos">{{ proveedor.total_productos }}</a></td>
+                    <td>
+                        <div class="actions">
+                            <a class="icon-btn" href="{% url 'detalle_proveedor' proveedor.pk %}" title="Lista de productos" aria-label="Ver productos de {{ proveedor.nombre }}">
+                                <svg class="icon" aria-hidden="true"><use href="#i-box"/></svg>
+                            </a>
+                            <a class="icon-btn" href="{% url 'modificar_proveedor' proveedor.pk %}" title="Modificar" aria-label="Modificar a {{ proveedor.nombre }}">
+                                <svg class="icon" aria-hidden="true"><use href="#i-edit"/></svg>
+                            </a>
+                            <button class="icon-btn icon-btn--danger" type="button" title="Eliminar" aria-label="Eliminar a {{ proveedor.nombre }}"
+                                    data-delete-url="{% url 'eliminar_proveedor' proveedor.pk %}"
+                                    data-title="¿Eliminar a {{ proveedor.nombre }}?"
+                                    data-text="Esta acción no se puede deshacer. Se eliminará también su lista de productos. Si alguno ya está en el inventario, no se podrá eliminar.">
+                                <svg class="icon" aria-hidden="true"><use href="#i-trash"/></svg>
+                            </button>
+                        </div>
                     </td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="7" class="text-center text-muted">No se encontraron proveedores.</td></tr>
+                <tr><td colspan="6" class="cell-empty">No se encontraron proveedores.</td></tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
+{% else %}
+<section class="card empty">
+    <span class="empty__icon"><svg class="icon" aria-hidden="true"><use href="#i-box"/></svg></span>
+    <h2>Aún no hay proveedores registrados</h2>
+    <p>Registra el primero junto con su lista de productos.</p>
+    <a class="btn btn--primary" href="{% url 'registrar_proveedor' %}">+ Registrar primer proveedor</a>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block modals %}
+{% include 'components/modal_eliminar.html' %}
 {% endblock %}

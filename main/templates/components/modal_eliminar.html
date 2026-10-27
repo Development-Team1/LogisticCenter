@@ -1,0 +1,13 @@
+{# Modal reutilizable. Los textos y la URL los pone app.js a partir del botón que lo abre (data-delete-url, data-title, data-text). #}
+<div class="modal" id="modal-eliminar" hidden role="dialog" aria-modal="true" aria-labelledby="modal-eliminar-title">
+    <div class="modal__card">
+        <span class="modal__icon modal__icon--danger"><svg class="icon" aria-hidden="true"><use href="#i-trash"/></svg></span>
+        <h2 class="modal__title" id="modal-eliminar-title" data-modal-title>¿Eliminar?</h2>
+        <p class="modal__text" data-modal-text>Esta acción no se puede deshacer.</p>
+        <form method="post" action="" class="modal__actions">
+            {% csrf_token %}
+            <button type="button" class="btn btn--outline" data-close-modal data-autofocus>Cancelar</button>
+            <button type="submit" class="btn btn--danger">Eliminar</button>
+        </form>
+    </div>
+</div>

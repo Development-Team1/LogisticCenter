@@ -1,56 +1,69 @@
 {% extends 'base.html' %}
-{% block title %}Categorías{% endblock %}
+{% block title %}Categorías · Logistic Center{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="p-4 mb-4 bg-light rounded-3">
-        <h1 class="h2 fw-bold mb-1">Categorías</h1>
-        <p class="mb-0 text-muted">Crea las categorías que luego se asignan a los productos.</p>
+<nav class="crumbs" aria-label="Ruta">
+    <a href="{% url 'listar_productos' %}">Productos</a><span aria-hidden="true">›</span><span>Categorías</span>
+</nav>
+
+<div class="page-head">
+    <div>
+        <h1 class="page-title">Categorías</h1>
+        <p class="page-lead">Crea las categorías que luego se asignan a los productos.</p>
     </div>
+</div>
 
-    {% include 'inventario/_mensajes.html' %}
-
-    <div class="row g-4">
-        <div class="col-md-5">
-            <div class="p-4 bg-white border rounded-3">
-                <h2 class="h5 mb-3">Nueva categoría</h2>
-                <form method="POST">
-                    {% csrf_token %}
-                    {% for campo in form %}
-                    <div class="mb-3">
-                        <label class="form-label" for="{{ campo.id_for_label }}">{{ campo.label }}</label>
-                        {{ campo }}
-                        {% for error in campo.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
-                    </div>
-                    {% endfor %}
-                    <button type="submit" class="btn btn-primary">Crear</button>
-                    <a href="{% url 'listar_productos' %}" class="btn btn-outline-secondary">Volver a productos</a>
-                </form>
+<div class="split">
+    <section class="card panel">
+        <h2>Nueva categoría</h2>
+        <form method="post" novalidate>
+            {% csrf_token %}
+            {% for campo in form %}
+                {% include 'components/campo.html' with campo=campo %}
+            {% endfor %}
+            <div class="form-actions" style="justify-content:flex-start;padding-top:8px;">
+                <button class="btn btn--primary" type="submit">Crear</button>
+                <a class="btn btn--outline" href="{% url 'listar_productos' %}">Volver a productos</a>
             </div>
-        </div>
-        <div class="col-md-7">
-            <table class="table align-middle">
-                <thead><tr><th>Nombre</th><th>Descripción</th><th>Productos</th><th></th></tr></thead>
+        </form>
+    </section>
+
+    <div class="table-card">
+        <div class="table-wrap">
+            <table class="table table--compact">
+                <thead>
+                    <tr>
+                        <th scope="col">Nombre</th>
+                        <th scope="col">Descripción</th>
+                        <th scope="col">Productos</th>
+                        <th scope="col"><span class="sr-only">Acciones</span></th>
+                    </tr>
+                </thead>
                 <tbody>
                     {% for categoria in categorias %}
                     <tr>
-                        <td>{{ categoria.nombre }}</td>
-                        <td>{{ categoria.descripcion }}</td>
-                        <td><span class="badge bg-secondary">{{ categoria.total_productos }}</span></td>
+                        <td class="cell-strong">{{ categoria.nombre }}</td>
+                        <td>{{ categoria.descripcion|default:"—" }}</td>
+                        <td><span class="pill pill--gray">{{ categoria.total_productos }}</span></td>
                         <td>
-                            <form method="POST" action="{% url 'eliminar_categoria' categoria.pk %}"
-                                  onsubmit="return confirm('¿Eliminar la categoría {{ categoria.nombre|escapejs }}? Los productos no se borran.');">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-dark btn-sm">Eliminar</button>
-                            </form>
+                            <button class="icon-btn icon-btn--danger" type="button" title="Eliminar" aria-label="Eliminar la categoría {{ categoria.nombre }}"
+                                    data-delete-url="{% url 'eliminar_categoria' categoria.pk %}"
+                                    data-title="¿Eliminar la categoría {{ categoria.nombre }}?"
+                                    data-text="Los productos de esta categoría no se borran.">
+                                <svg class="icon" aria-hidden="true"><use href="#i-trash"/></svg>
+                            </button>
                         </td>
                     </tr>
                     {% empty %}
-                    <tr><td colspan="4" class="text-center text-muted">Aún no hay categorías.</td></tr>
+                    <tr><td colspan="4" class="cell-empty">Aún no hay categorías.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block modals %}
+{% include 'components/modal_eliminar.html' %}
 {% endblock %}

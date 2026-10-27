@@ -1,0 +1,12 @@
+{# Modal para activar / inactivar. Textos y enlace los pone app.js (data-state-url, data-title, data-text, data-confirm-label). #}
+<div class="modal" id="modal-estado" hidden role="dialog" aria-modal="true" aria-labelledby="modal-estado-title">
+    <div class="modal__card">
+        <span class="modal__icon modal__icon--warn"><svg class="icon" aria-hidden="true"><use href="#i-power"/></svg></span>
+        <h2 class="modal__title" id="modal-estado-title" data-modal-title>¿Cambiar estado?</h2>
+        <p class="modal__text" data-modal-text></p>
+        <div class="modal__actions">
+            <button type="button" class="btn btn--outline" data-close-modal data-autofocus>Cancelar</button>
+            <a href="#" class="btn btn--primary" data-state-confirm>Confirmar</a>
+        </div>
+    </div>
+</div>

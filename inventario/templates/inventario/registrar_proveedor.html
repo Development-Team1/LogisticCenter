@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}Registrar proveedor · Logistic Center{% endblock %}
+{% block page_class %}page--narrow{% endblock %}
+
+{% block content %}
+<nav class="crumbs" aria-label="Ruta">
+    <a href="{% url 'listar_proveedores' %}">Proveedores</a><span aria-hidden="true">›</span><span>Registrar proveedor</span>
+</nav>
+
+<section class="card form-card">
+    <header class="form-card__head">
+        <div>
+            <h1>Registrar proveedor</h1>
+            <p>Todos los campos son obligatorios. Cada proveedor necesita al menos un producto en su lista.</p>
+        </div>
+    </header>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="form-alert">{{ form.non_field_errors }}</div>{% endif %}
+
+        <section class="section" aria-labelledby="sec-proveedor">
+            <h2 class="section__title" id="sec-proveedor">Datos del proveedor</h2>
+            {% for campo in form %}
+                {% include 'components/campo.html' with campo=campo %}
+            {% endfor %}
+        </section>
+
+        <section class="section" aria-labelledby="sec-productos" style="border-bottom:0;">
+            <h2 class="section__title" id="sec-productos">Lista de productos</h2>
+            {{ formset.management_form }}
+            {% if formset.non_form_errors %}<div class="form-alert" style="margin-top:0;margin-bottom:14px;">{{ formset.non_form_errors }}</div>{% endif %}
+
+            <div id="lista-productos" data-prefix="{{ formset.prefix }}">
+                {% for f in formset %}
+                    {% include 'inventario/_producto_proveedor_fila.html' with f=f numero=forloop.counter %}
+                {% endfor %}
+            </div>
+
+            <template id="plantilla-producto">
+                {% include 'inventario/_producto_proveedor_fila.html' with f=formset.empty_form numero='__num__' %}
+            </template>
+
+            <button class="btn btn--outline" type="button" id="agregar-producto">+ Agregar otro producto</button>
+        </section>
+
+        <div class="form-actions" style="padding-top:4px;">
+            <a class="btn btn--outline" href="{% url 'listar_proveedores' %}">Cancelar</a>
+            <button class="btn btn--primary" type="submit">Guardar proveedor</button>
+        </div>
+    </form>
+</section>
+{% endblock %}

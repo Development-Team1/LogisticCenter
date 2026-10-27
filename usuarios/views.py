@@ -1,10 +1,16 @@
+from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required,  user_passes_test
 from django.contrib import messages
 from django.views.decorators.http import require_POST
-from .forms import IniciarSesionForm, RegistrarUsuarioForm, ModificarUsuarioForm
+from .forms import (
+    IniciarSesionForm,
+    ModificarClienteForm,
+    ModificarEmpleadoForm,
+    RegistrarClienteForm,
+    RegistrarEmpleadoForm,
+)
 from .models import Usuario
 
 # Create your views here.
@@ -32,222 +38,183 @@ def CerrarSesionView(request):
     logout(request)
     return redirect('bienvenida')
     
-@login_required
-@user_passes_test(lambda u: u.is_staff)
-def RegistrarUsuarioView(request):
+solo_staff = lambda vista: login_required(user_passes_test(lambda u: u.is_staff)(vista))
+
+
+# Configuración de cada tipo de usuario. Empleados y clientes comparten la lógica,
+# pero cada uno tiene sus propias páginas (registro, lista y modificación) y su
+# propio formulario; el tipo lo fija la página, nunca el usuario.
+TIPOS = {
+    'empleado': {
+        'is_staff': True,
+        'relacion': 'empleado',
+        'singular': 'empleado',
+        'plural': 'empleados',
+        'titulo_plural': 'Empleados',
+        'form_registro': RegistrarEmpleadoForm,
+        'form_modificar': ModificarEmpleadoForm,
+        'url_lista': 'listar_empleados',
+        'url_registro': 'registrar_empleado',
+        'url_modificar': 'modificar_empleado',
+    },
+    'cliente': {
+        'is_staff': False,
+        'relacion': 'cliente',
+        'singular': 'cliente',
+        'plural': 'clientes',
+        'titulo_plural': 'Clientes',
+        'form_registro': RegistrarClienteForm,
+        'form_modificar': ModificarClienteForm,
+        'url_lista': 'listar_clientes',
+        'url_registro': 'registrar_cliente',
+        'url_modificar': 'modificar_cliente',
+    },
+}
+
+
+def _contexto(tipo, **extra):
+    return {'tipo': tipo, 'cfg': TIPOS[tipo], **extra}
+
+
+def _url_lista_de(usuario):
+    return TIPOS['empleado' if usuario.is_staff else 'cliente']['url_lista']
+
+
+def _registrar(request, tipo):
+    cfg = TIPOS[tipo]
 
     if request.method == 'POST':
-
-        form = RegistrarUsuarioForm(request.POST)
-
+        form = cfg['form_registro'](request.POST)
         if form.is_valid():
-
             form.save()
-
-            messages.success(
-                request,
-                'Usuario registrado correctamente.'
-            )
-
-            return redirect('registro')
-
+            messages.success(request, f'{cfg["singular"].capitalize()} registrado correctamente.')
+            return redirect(cfg['url_lista'])
         messages.error(
             request,
-            'No fue posible registrar el usuario. Verifique los datos ingresados.'
+            f'No fue posible registrar al {cfg["singular"]}. Verifique los datos ingresados.',
         )
-
     else:
+        form = cfg['form_registro'](initial={'is_active': True})
 
-        form = RegistrarUsuarioForm()
-
-    return render(
-        request,
-        'registrar_usuario.html',
-        {
-            'form': form
-        }
-    )
+    return render(request, 'registrar_persona.html', _contexto(tipo, form=form))
 
 
-@login_required
-@user_passes_test(lambda u: u.is_staff)
-def ListarUsuariosView(request):
-
+def _listar(request, tipo):
+    cfg = TIPOS[tipo]
     busqueda = request.GET.get('q', '').strip()
-    tipo = request.GET.get('tipo', '')
 
-    usuarios = Usuario.objects.all().order_by('user_id')
+    base = Usuario.objects.filter(is_staff=cfg['is_staff'])
+    personas = base.select_related(cfg['relacion']).order_by('user_id')
 
     if busqueda:
-        usuarios = usuarios.filter(username__icontains=busqueda)
+        personas = personas.filter(
+            Q(username__icontains=busqueda)
+            | Q(first_name__icontains=busqueda)
+            | Q(last_name__icontains=busqueda)
+            | Q(email__icontains=busqueda)
+            | Q(**{f'{cfg["relacion"]}__numero_documento__icontains': busqueda})
+        )
 
-    if tipo == 'empleados':
-        usuarios = usuarios.filter(is_staff=True)
-    elif tipo == 'clientes':
-        usuarios = usuarios.filter(is_staff=False)
-    else:
-        tipo = ''
+    return render(request, 'listar_personas.html', _contexto(
+        tipo, personas=personas, busqueda=busqueda, total=base.count(),
+    ))
 
-    return render(
-        request,
-        'listar_usuarios.html',
-        {
-            'usuarios': usuarios,
-            'busqueda': busqueda,
-            'tipo': tipo
-        }
-    )
 
-@login_required
-@user_passes_test(lambda u: u.is_staff)
-
-def ModificarUsuarioView(request, user_id):
-
-    usuario = get_object_or_404(
-        Usuario,
-        user_id=user_id
-    )
+def _modificar(request, tipo, user_id):
+    cfg = TIPOS[tipo]
+    # Un empleado solo se edita desde empleados y un cliente solo desde clientes.
+    usuario = get_object_or_404(Usuario, user_id=user_id, is_staff=cfg['is_staff'])
 
     if usuario.is_superuser and not request.user.is_superuser:
-
-        messages.warning(
-            request,
-            'No tiene permisos para modificar a un superusuario.'
-        )
-
-        return redirect('listar_usuarios')
+        messages.warning(request, 'No tiene permisos para modificar a un superusuario.')
+        return redirect(cfg['url_lista'])
 
     if request.method == 'POST':
-
-        form = ModificarUsuarioForm(
-            request.POST,
-            instance=usuario
-        )
-
+        form = cfg['form_modificar'](request.POST, instance=usuario)
         if form.is_valid():
-
-            usuario = form.save(commit=False)
-
-            nueva_password = form.cleaned_data.get('password')
-
-            if nueva_password:
-                usuario.set_password(nueva_password)
-
-            usuario.save()
-
-            messages.success(
-                request,
-                'Usuario modificado correctamente.'
-            )
-
-            return redirect(
-                'modificar_usuario',
-                user_id=usuario.user_id
-            )
-
-        messages.error(
-            request,
-            'No fue posible modificar el usuario.'
-        )
-
+            usuario = form.save()
+            messages.success(request, f'{cfg["singular"].capitalize()} actualizado correctamente.')
+            return redirect(cfg['url_modificar'], user_id=usuario.user_id)
+        messages.error(request, f'No fue posible modificar al {cfg["singular"]}.')
     else:
+        form = cfg['form_modificar'](instance=usuario)
 
-        form = ModificarUsuarioForm(
-            instance=usuario
-        )
+    return render(request, 'modificar_persona.html', _contexto(tipo, form=form, usuario=usuario))
 
-    return render(
-        request,
-        'modificar_usuario.html',
-        {
-            'form': form,
-            'usuario': usuario
-        }
-    )
-        
-@login_required
-@user_passes_test(lambda u: u.is_staff)
+
+# ---- Empleados --------------------------------------------------------------
+
+@solo_staff
+def RegistrarEmpleadoView(request):
+    return _registrar(request, 'empleado')
+
+
+@solo_staff
+def ListarEmpleadosView(request):
+    return _listar(request, 'empleado')
+
+
+@solo_staff
+def ModificarEmpleadoView(request, user_id):
+    return _modificar(request, 'empleado', user_id)
+
+
+# ---- Clientes ---------------------------------------------------------------
+
+@solo_staff
+def RegistrarClienteView(request):
+    return _registrar(request, 'cliente')
+
+
+@solo_staff
+def ListarClientesView(request):
+    return _listar(request, 'cliente')
+
+
+@solo_staff
+def ModificarClienteView(request, user_id):
+    return _modificar(request, 'cliente', user_id)
+
+
+# ---- Acciones comunes (activar / inactivar / eliminar) -----------------------
+
+@solo_staff
 def CambiarEstadoUsuarioView(request, user_id):
-
-    usuario = get_object_or_404(
-        Usuario,
-        user_id=user_id
-    )
+    usuario = get_object_or_404(Usuario, user_id=user_id)
+    destino = _url_lista_de(usuario)
 
     if usuario.is_superuser:
+        messages.warning(request, 'No es posible modificar el estado de un superusuario.')
+        return redirect(destino)
 
-        messages.warning(
-            request,
-            'No es posible modificar el estado de un superusuario.'
-        )
-
-        return redirect('listar_usuarios')
-    
     if usuario == request.user:
-
-        messages.warning(
-        request,
-        'No puede cambiar el estado de su propio usuario.'
-    )
-
-        return redirect('listar_usuarios')
+        messages.warning(request, 'No puede cambiar el estado de su propio usuario.')
+        return redirect(destino)
 
     usuario.is_active = not usuario.is_active
-
     usuario.save()
 
-    if usuario.is_active:
-
-        messages.success(
-            request,
-            f'El usuario {usuario.username} fue activado correctamente.'
-        )
-
-    else:
-
-        messages.success(
-            request,
-            f'El usuario {usuario.username} fue inactivado correctamente.'
-        )
-
-    return redirect('listar_usuarios')
+    accion = 'activado' if usuario.is_active else 'inactivado'
+    messages.success(request, f'El usuario {usuario.username} fue {accion} correctamente.')
+    return redirect(destino)
 
 
-@login_required
-@user_passes_test(lambda u: u.is_staff)
+@solo_staff
 @require_POST
 def EliminarUsuarioView(request, user_id):
-
-    usuario = get_object_or_404(
-        Usuario,
-        user_id=user_id
-    )
+    usuario = get_object_or_404(Usuario, user_id=user_id)
+    destino = _url_lista_de(usuario)
 
     if usuario.is_superuser:
-
-        messages.warning(
-            request,
-            'No es posible eliminar a un superusuario.'
-        )
-
-        return redirect('listar_usuarios')
+        messages.warning(request, 'No es posible eliminar a un superusuario.')
+        return redirect(destino)
 
     if usuario == request.user:
-
-        messages.warning(
-            request,
-            'No puede eliminar su propio usuario.'
-        )
-
-        return redirect('listar_usuarios')
+        messages.warning(request, 'No puede eliminar su propio usuario.')
+        return redirect(destino)
 
     username = usuario.username
-
     usuario.delete()
 
-    messages.success(
-        request,
-        f'El usuario {username} fue eliminado correctamente.'
-    )
-
-    return redirect('listar_usuarios')
+    messages.success(request, f'El usuario {username} fue eliminado correctamente.')
+    return redirect(destino)

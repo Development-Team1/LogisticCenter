@@ -1,0 +1,45 @@
+<tr>
+    <td class="cell-strong">{{ usuario.username }}</td>
+    <td>{{ usuario.get_full_name|default:"—" }}</td>
+    <td>{% if perfil %}{{ perfil.tipo_documento }} {{ perfil.numero_documento }}{% else %}<span class="muted" title="Datos pendientes: complételos al modificar">—</span>{% endif %}</td>
+    <td>{{ perfil.telefono|default:"—" }}</td>
+    <td>{% if tipo == 'empleado' %}{{ perfil.cargo|default:"—" }}{% else %}{{ perfil.ciudad|default:"—" }}{% endif %}</td>
+    <td>{{ usuario.email|default:"—" }}</td>
+    <td>
+        {% if usuario.is_active %}
+        <span class="pill pill--green">Activo</span>
+        {% else %}
+        <span class="pill pill--gray">Inactivo</span>
+        {% endif %}
+    </td>
+    <td>
+        <div class="actions">
+            <a class="icon-btn" href="{% url cfg.url_modificar usuario.user_id %}" title="Modificar" aria-label="Modificar a {{ usuario.username }}">
+                <svg class="icon" aria-hidden="true"><use href="#i-edit"/></svg>
+            </a>
+            {% if usuario.is_active %}
+            <a class="icon-btn" href="{% url 'cambiar_estado_usuario' usuario.user_id %}" title="Inactivar" aria-label="Inactivar a {{ usuario.username }}"
+               data-state-url="{% url 'cambiar_estado_usuario' usuario.user_id %}"
+               data-title="¿Inactivar a {{ usuario.username }}?"
+               data-text="No podrá iniciar sesión hasta que lo actives de nuevo."
+               data-confirm-label="Sí, inactivar">
+                <svg class="icon" aria-hidden="true"><use href="#i-power"/></svg>
+            </a>
+            {% else %}
+            <a class="icon-btn" href="{% url 'cambiar_estado_usuario' usuario.user_id %}" title="Activar" aria-label="Activar a {{ usuario.username }}"
+               data-state-url="{% url 'cambiar_estado_usuario' usuario.user_id %}"
+               data-title="¿Activar a {{ usuario.username }}?"
+               data-text="Podrá volver a iniciar sesión con sus credenciales."
+               data-confirm-label="Sí, activar">
+                <svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>
+            </a>
+            {% endif %}
+            <button class="icon-btn icon-btn--danger" type="button" title="Eliminar" aria-label="Eliminar a {{ usuario.username }}"
+                    data-delete-url="{% url 'eliminar_usuario' usuario.user_id %}"
+                    data-title="¿Eliminar a {{ usuario.username }}?"
+                    data-text="Esta acción no se puede deshacer. Si solo quieres bloquear el acceso, mejor inactívalo.">
+                <svg class="icon" aria-hidden="true"><use href="#i-trash"/></svg>
+            </button>
+        </div>
+    </td>
+</tr>

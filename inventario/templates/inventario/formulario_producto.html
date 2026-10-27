@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ titulo }} · Logistic Center{% endblock %}
+{% block page_class %}page--narrow{% endblock %}
+
+{% block content %}
+<nav class="crumbs" aria-label="Ruta">
+    <a href="{% url 'listar_productos' %}">Productos</a><span aria-hidden="true">›</span><span>{% if form.es_modificacion %}Modificar{% else %}Registrar{% endif %}</span>
+</nav>
+
+<section class="card form-card">
+    <header class="form-card__head">
+        <div>
+            <h1>{{ titulo }}</h1>
+            {% if form.es_modificacion %}
+            <p>Solo se pueden modificar el precio y el stock.</p>
+            {% else %}
+            <p>Elige el proveedor y luego el producto de su lista: el nombre y el código se completan solos.</p>
+            {% endif %}
+        </div>
+    </header>
+
+    <form method="post" novalidate id="form-producto">
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="form-alert">{{ form.non_field_errors }}</div>{% endif %}
+
+        <section class="section" style="border-bottom:0;">
+            {% include 'components/campo.html' with campo=form.proveedor %}
+            <div class="field-row">
+                {% include 'components/campo.html' with campo=form.nombre %}
+                {% include 'components/campo.html' with campo=form.codigo %}
+            </div>
+
+            {% if not form.es_modificacion %}
+            <p class="info-producto" id="info-producto" hidden aria-live="polite"></p>
+            <datalist id="opciones-nombre"></datalist>
+            <datalist id="opciones-codigo"></datalist>
+            {% else %}
+            <p class="info-producto">{{ producto.descripcion }} · Marca: {{ producto.marca }} · Unidad: {{ producto.unidad_medida }}</p>
+            {% endif %}
+
+            <div class="field-row" style="margin-top:16px;">
+                {% include 'components/campo.html' with campo=form.precio %}
+                {% include 'components/campo.html' with campo=form.stock %}
+            </div>
+            {% if form.categorias %}
+                <div class="field">
+                    <span class="label">Categorías</span>
+                    {{ form.categorias }}
+                </div>
+            {% endif %}
+        </section>
+
+        <div class="form-actions" style="padding-top:4px;">
+            <a class="btn btn--outline" href="{% url 'listar_productos' %}">Cancelar</a>
+            <button class="btn btn--primary" type="submit">Guardar</button>
+        </div>
+    </form>
+</section>
+{% endblock %}
+
+{% block scripts %}
+{% if catalogo is not None and not form.es_modificacion %}
+{{ catalogo|json_script:"catalogo-data" }}
+<script src="{% static 'js/producto_form.js' %}" defer></script>
+{% endif %}
+{% endblock %}

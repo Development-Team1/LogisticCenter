@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block title %}{{ proveedor.nombre }} · Logistic Center{% endblock %}
+
+{% block content %}
+<nav class="crumbs" aria-label="Ruta">
+    <a href="{% url 'listar_proveedores' %}">Proveedores</a><span aria-hidden="true">›</span><span>{{ proveedor.nombre }}</span>
+</nav>
+
+<div class="page-head">
+    <div>
+        <h1 class="page-title">{{ proveedor.nombre }}</h1>
+        <p class="page-lead">NIT {{ proveedor.nit }} · {{ proveedor.telefono }} · {{ proveedor.email }}</p>
+    </div>
+    <a class="btn btn--outline" href="{% url 'modificar_proveedor' proveedor.pk %}">Modificar proveedor</a>
+</div>
+
+<h2 class="section__title" style="margin-bottom:12px;">Lista de productos del proveedor</h2>
+<div class="table-card" style="margin-bottom:28px;">
+    <div class="table-wrap">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Código</th>
+                    <th scope="col">Nombre</th>
+                    <th scope="col">Marca</th>
+                    <th scope="col">Unidad</th>
+                    <th scope="col">Descripción</th>
+                    <th scope="col">Inventario</th>
+                    <th scope="col">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in productos %}
+                <tr>
+                    <td class="cell-strong">{{ p.codigo }}</td>
+                    <td>{{ p.nombre }}</td>
+                    <td>{{ p.marca }}</td>
+                    <td>{{ p.get_unidad_medida_display }}</td>
+                    <td>{{ p.descripcion|truncatechars:60 }}</td>
+                    <td>
+                        {% if p.inventario %}<span class="pill pill--green">Registrado</span>{% else %}<span class="pill pill--gray">Sin registrar</span>{% endif %}
+                    </td>
+                    <td>
+                        <div class="actions">
+                            <a class="icon-btn" href="{% url 'modificar_producto_proveedor' p.pk %}" title="Modificar" aria-label="Modificar {{ p.nombre }}">
+                                <svg class="icon" aria-hidden="true"><use href="#i-edit"/></svg>
+                            </a>
+                            <button class="icon-btn icon-btn--danger" type="button" title="Quitar de la lista" aria-label="Quitar {{ p.nombre }}"
+                                    data-delete-url="{% url 'eliminar_producto_proveedor' p.pk %}"
+                                    data-title="¿Quitar {{ p.nombre }} de la lista?"
+                                    data-text="Si el producto ya está registrado en el inventario, no se podrá quitar.">
+                                <svg class="icon" aria-hidden="true"><use href="#i-trash"/></svg>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="cell-empty">Este proveedor aún no tiene productos.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<section class="card panel" style="max-width:720px;">
+    <h2>Agregar producto a la lista</h2>
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="form-alert" style="margin-top:0;margin-bottom:12px;">{{ form.non_field_errors }}</div>{% endif %}
+        <div class="field-row">
+            {% include 'components/campo.html' with campo=form.codigo %}
+            {% include 'components/campo.html' with campo=form.nombre %}
+        </div>
+        <div class="field-row">
+            {% include 'components/campo.html' with campo=form.marca %}
+            {% include 'components/campo.html' with campo=form.unidad_medida %}
+        </div>
+        {% include 'components/campo.html' with campo=form.descripcion %}
+        <button class="btn btn--primary" type="submit" style="margin-top:8px;">Agregar producto</button>
+    </form>
+</section>
+{% endblock %}
+
+{% block modals %}
+{% include 'components/modal_eliminar.html' %}
+{% endblock %}

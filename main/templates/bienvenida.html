@@ -1,26 +1,17 @@
 {% extends 'base.html' %}
 {% load static %}
+{% block title %}Logistic Center{% endblock %}
+{% block page_class %}page--auth{% endblock %}
 
 {% block content %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Logistic center</title>
-</head>
-<body >
-    <div class="px-4 py-5 my-5 text-center">
-        <img class="d-block mx-auto mb-4" src="{% static 'img/isotipo_v1.png' %}" alt="" width="160" height="160">
-            <h1 class="display-5 fw-bold">Bienvenido a Logistic center</h1>
-                <div class="col-lg-6 mx-auto">
-                    <p class="lead mb-4">Somos una plataforma para llevar el control de tu empresa desde la parte logistica hasta el apartado financiero, que esperas para impulsar tu organizacion a otro nivel.</p>
-                        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-                            <a class="btn btn-primary" href='login' role="button">Iniciar sesion</a>
-                        </div>
-        </div>
-  </div>
-</body>
-</html>
-
+<section class="hero">
+    <img src="{% static 'img/isotipo_v1.png' %}" alt="">
+    <h1>Bienvenido a Logistic Center</h1>
+    <p>Somos una plataforma para llevar el control de tu empresa, desde la parte logística hasta el apartado financiero. ¿Qué esperas para impulsar tu organización a otro nivel?</p>
+    {% if user.is_authenticated %}
+    <a class="btn btn--primary btn--lg" href="{% url 'dashboard' %}">Ir al dashboard</a>
+    {% else %}
+    <a class="btn btn--primary btn--lg" href="{% url 'login' %}">Iniciar sesión</a>
+    {% endif %}
+</section>
 {% endblock %}

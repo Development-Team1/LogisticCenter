@@ -1,71 +1,79 @@
 {% extends 'base.html' %}
-{% block title %}Productos{% endblock %}
+{% block title %}Productos · Logistic Center{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="p-4 mb-4 bg-light rounded-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
-        <div>
-            <h1 class="h2 fw-bold mb-1">Productos</h1>
-            <p class="mb-0 text-muted">Registra, modifica y elimina los productos del inventario.</p>
-        </div>
-        <div class="d-flex gap-2">
-            <a href="{% url 'categorias' %}" class="btn btn-outline-secondary">Categorías</a>
-            <a href="{% url 'registrar_producto' %}" class="btn btn-primary">Registrar producto</a>
-        </div>
+<nav class="crumbs" aria-label="Ruta">
+    <a href="{% url 'dashboard' %}">Inicio</a><span aria-hidden="true">›</span><span>Productos</span>
+</nav>
+
+<div class="page-head">
+    <h1 class="page-title">Productos</h1>
+    <div class="actions">
+        <a class="btn btn--outline btn--lg" href="{% url 'categorias' %}">Categorías</a>
+        <a class="btn btn--primary btn--lg" href="{% url 'registrar_producto' %}">+ Registrar producto</a>
     </div>
+</div>
 
-    {% include 'inventario/_mensajes.html' %}
+<form method="get" class="toolbar" role="search">
+    <input class="input" type="search" name="q" value="{{ busqueda }}" placeholder="Buscar por nombre o código" aria-label="Buscar por nombre o código">
+    <button class="btn btn--outline" type="submit">Buscar</button>
+    {% if busqueda %}<a class="btn btn--ghost" href="{% url 'listar_productos' %}">Limpiar</a>{% endif %}
+</form>
 
-    <form method="GET" class="row g-2 mb-3">
-        <div class="col-md-6">
-            <input type="text" name="q" value="{{ busqueda }}" class="form-control"
-                   placeholder="Buscar por nombre o código">
-        </div>
-        <div class="col-md-6 d-flex gap-2">
-            <button class="btn btn-primary" type="submit">Buscar</button>
-            {% if busqueda %}
-                <a href="{% url 'listar_productos' %}" class="btn btn-outline-secondary">Limpiar</a>
-            {% endif %}
-        </div>
-    </form>
-
-    <div class="table-responsive">
-        <table class="table align-middle">
+<div class="table-card">
+    <div class="table-wrap">
+        <table class="table">
             <thead>
                 <tr>
-                    <th>Código</th><th>Nombre</th><th>Precio</th><th>Stock</th>
-                    <th>Proveedor</th><th>Categorías</th><th>Acciones</th>
+                    <th scope="col">Código</th>
+                    <th scope="col">Nombre</th>
+                    <th scope="col">Precio</th>
+                    <th scope="col">Stock</th>
+                    <th scope="col">Proveedor</th>
+                    <th scope="col">Categorías</th>
+                    <th scope="col">Acciones</th>
                 </tr>
             </thead>
             <tbody>
                 {% for producto in productos %}
                 <tr>
-                    <td>{{ producto.codigo }}</td>
-                    <td><a href="{% url 'detalle_producto' producto.pk %}">{{ producto.nombre }}</a></td>
+                    <td class="cell-strong">{{ producto.codigo }}</td>
+                    <td><a class="link-strong" href="{% url 'detalle_producto' producto.pk %}">{{ producto.nombre }}</a></td>
                     <td>${{ producto.precio }}</td>
                     <td>{{ producto.stock }}</td>
                     <td>{{ producto.proveedor.nombre }}</td>
                     <td>
-                        {% for categoria in producto.categorias.all %}
-                            <span class="badge bg-info text-dark">{{ categoria.nombre }}</span>
-                        {% empty %}
-                            <span class="text-muted">—</span>
-                        {% endfor %}
+                        <div class="chips">
+                            {% for categoria in producto.categorias.all %}
+                            <span class="pill pill--blue">{{ categoria.nombre }}</span>
+                            {% empty %}
+                            <span class="muted">—</span>
+                            {% endfor %}
+                        </div>
                     </td>
-                    <td class="text-nowrap">
-                        <a href="{% url 'modificar_producto' producto.pk %}" class="btn btn-warning btn-sm">Modificar</a>
-                        <form method="POST" action="{% url 'eliminar_producto' producto.pk %}" class="d-inline"
-                              onsubmit="return confirm('¿Desea eliminar permanentemente {{ producto.nombre|escapejs }}?');">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-dark btn-sm">Eliminar</button>
-                        </form>
+                    <td>
+                        <div class="actions">
+                            <a class="icon-btn" href="{% url 'modificar_producto' producto.pk %}" title="Modificar" aria-label="Modificar {{ producto.nombre }}">
+                                <svg class="icon" aria-hidden="true"><use href="#i-edit"/></svg>
+                            </a>
+                            <button class="icon-btn icon-btn--danger" type="button" title="Eliminar" aria-label="Eliminar {{ producto.nombre }}"
+                                    data-delete-url="{% url 'eliminar_producto' producto.pk %}"
+                                    data-title="¿Eliminar {{ producto.nombre }}?"
+                                    data-text="Esta acción no se puede deshacer.">
+                                <svg class="icon" aria-hidden="true"><use href="#i-trash"/></svg>
+                            </button>
+                        </div>
                     </td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="7" class="text-center text-muted">No se encontraron productos.</td></tr>
+                <tr><td colspan="7" class="cell-empty">No se encontraron productos.</td></tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
+{% endblock %}
+
+{% block modals %}
+{% include 'components/modal_eliminar.html' %}
 {% endblock %}
