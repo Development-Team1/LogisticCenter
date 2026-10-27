@@ -1,113 +1,21 @@
 {% extends 'base.html' %}
 {% load static %}
+{% block title %}Iniciar sesión · Logistic Center{% endblock %}
+{% block page_class %}page--auth{% endblock %}
 
 {% block content %}
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
-    <meta name="generator" content="Hugo 0.84.0">
+<section class="card auth-card">
+    <img class="auth-card__logo" src="{% static 'img/imagotipo_vertical_v1.png' %}" alt="Logistic Center">
+    <h1>Iniciar sesión</h1>
 
-    <title>Inicio de sesion</title>
-   <!-- Custom styles for this template -->
-    <link href="{% static 'login.css' %}"" rel="stylesheet">
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="form-alert" style="margin-top:0;margin-bottom:16px;">{{ form.non_field_errors }}</div>{% endif %}
+        {% include 'components/campo.html' with campo=form.username %}
+        {% include 'components/campo.html' with campo=form.password %}
+        <button class="btn btn--primary btn--block" type="submit">Entrar</button>
+    </form>
 
-  </head>
-  <body class="text-center"></body>
-    <div class="login-container">
-        <div class="login-box">
-             <main class="form-signin">
-                    <form method="POST">
-                        {% csrf_token %}
-                        <img class="mb-4" src="{% static 'img/imagotipo_vertical_v1.png' %}" alt="" width="120" height="120">
-                            <h1 class="h3 mb-3 fw-normal">Inicio de sesion</h1>
-                            {{form}}
-                            <button class="w-100 btn btn-lg btn-primary" type="submit">Entrar</button>
-                                <p class="mt-5 mb-3 text-muted">&copy; Logistic center S.A.S 2026</p>
-                    </form>
-            </main>
-        </div>
-    </div>
-  </body>
-</html>
-
+    <p class="auth-card__foot">&copy; Logistic center S.A.S 2026</p>
+</section>
 {% endblock %}
-
-
-
-<!--
-
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesión</title>
-
-    <style>
-        body{
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f4f4f4;
-        }
-
-        .login-container{
-            background-color: white;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            width: 300px;
-        }
-
-        h2{
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        form p{
-            margin-bottom: 10px;
-        }
-
-        button{
-            width: 100%;
-            padding: 10px;
-            cursor: pointer;
-        }
-
-        .errores{
-            color: red;
-            margin-bottom: 10px;
-        }
-    </style>
-</head>
-<body>
-
-    <div class="login-container">
-        <h2>Iniciar Sesión</h2>
-
-        {% if form.errors %}
-            <div class="errores">
-                Usuario o contraseña incorrectos.
-            </div>
-        {% endif %}
-
-        <form method="POST">
-            {% csrf_token %}
-
-            {{ form.as_p }}
-
-            <button type="submit">Ingresar</button>
-        </form>
-    </div>
-
-</body>
-</html>
-
--->

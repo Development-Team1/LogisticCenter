@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Modificar {{ cfg.singular }} · Logistic Center{% endblock %}
+{% block page_class %}page--narrow{% endblock %}
+
+{% block content %}
+<nav class="crumbs" aria-label="Ruta">
+    <a href="{% url cfg.url_lista %}">{{ cfg.titulo_plural }}</a><span aria-hidden="true">›</span><span>Modificar {{ cfg.singular }}</span>
+</nav>
+
+<section class="card form-card">
+    <header class="form-card__head">
+        <span class="avatar" aria-hidden="true">{{ usuario.username|first }}</span>
+        <div>
+            <h1>Modificar {{ cfg.singular }}</h1>
+            <p>Editando a <strong>{{ usuario.username }}</strong></p>
+        </div>
+    </header>
+
+    <form method="post" novalidate>
+        {% include '_form_persona.html' with modificar=True %}
+        <div class="form-actions">
+            <a class="btn btn--outline" href="{% url cfg.url_lista %}">Cancelar</a>
+            <button class="btn btn--primary" type="submit">Guardar cambios</button>
+        </div>
+    </form>
+</section>
+{% endblock %}

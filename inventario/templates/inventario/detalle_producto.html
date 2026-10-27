@@ -1,98 +1,95 @@
 {% extends 'base.html' %}
-{% block title %}{{ producto.nombre }}{% endblock %}
+{% block title %}{{ producto.nombre }} · Logistic Center{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="p-4 mb-4 bg-light rounded-3 d-flex justify-content-between align-items-start flex-wrap gap-2">
-        <div>
-            <h1 class="h2 fw-bold mb-1">{{ producto.nombre }}</h1>
-            <p class="mb-0 text-muted">Código: {{ producto.codigo }}</p>
-        </div>
-        <a href="{% url 'catalogo' %}" class="btn btn-outline-secondary">Volver al catálogo</a>
+<nav class="crumbs" aria-label="Ruta">
+    <a href="{% url 'catalogo' %}">Catálogo</a><span aria-hidden="true">›</span><span>{{ producto.nombre }}</span>
+</nav>
+
+<div class="page-head">
+    <div>
+        <h1 class="page-title">{{ producto.nombre }}</h1>
+        <p class="page-lead">Código: {{ producto.codigo }}</p>
     </div>
-
-    {% include 'inventario/_mensajes.html' %}
-
-    <div class="row g-4">
-        <div class="col-md-6">
-            <div class="p-4 bg-white border rounded-3 h-100">
-                <h2 class="h5 mb-3">Información</h2>
-                <dl class="row mb-0">
-                    <dt class="col-sm-4">Precio</dt><dd class="col-sm-8">${{ producto.precio }}</dd>
-                    <dt class="col-sm-4">Stock</dt><dd class="col-sm-8">{{ producto.stock }}</dd>
-                    <dt class="col-sm-4">Proveedor</dt><dd class="col-sm-8">{{ producto.proveedor.nombre }}</dd>
-                    <dt class="col-sm-4">Descripción</dt><dd class="col-sm-8">{{ producto.descripcion|default:"—" }}</dd>
-                    <dt class="col-sm-4">Categorías</dt>
-                    <dd class="col-sm-8">
-                        {% for categoria in producto.categorias.all %}
-                            <span class="badge bg-info text-dark">{{ categoria.nombre }}</span>
-                        {% empty %}—{% endfor %}
-                    </dd>
-                </dl>
-            </div>
-        </div>
-
-        <div class="col-md-6">
-            <div class="p-4 bg-white border rounded-3 h-100">
-                <h2 class="h5 mb-3">Características</h2>
-                <table class="table table-sm align-middle">
-                    <tbody>
-                        {% for c in producto.caracteristicas.all %}
-                        <tr>
-                            <th>{{ c.nombre }}</th>
-                            <td>{{ c.valor }}</td>
-                            {% if request.user.is_staff %}
-                            <td class="text-end">
-                                <form method="POST" action="{% url 'eliminar_caracteristica' c.pk %}"
-                                      onsubmit="return confirm('¿Eliminar esta característica?');">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-outline-danger btn-sm">Quitar</button>
-                                </form>
-                            </td>
-                            {% endif %}
-                        </tr>
-                        {% empty %}
-                        <tr><td class="text-muted">Este producto aún no tiene características.</td></tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        {% if request.user.is_staff %}
-        <div class="col-md-6">
-            <div class="p-4 bg-white border rounded-3">
-                <h2 class="h5 mb-3">Registrar característica</h2>
-                <form method="POST">
-                    {% csrf_token %}
-                    <input type="hidden" name="accion" value="caracteristica">
-                    {% for campo in form_caracteristica %}
-                    <div class="mb-3">
-                        <label class="form-label" for="{{ campo.id_for_label }}">{{ campo.label }}</label>
-                        {{ campo }}
-                        {% for error in campo.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
-                    </div>
-                    {% endfor %}
-                    <button type="submit" class="btn btn-primary">Agregar</button>
-                </form>
-            </div>
-        </div>
-
-        <div class="col-md-6">
-            <div class="p-4 bg-white border rounded-3">
-                <h2 class="h5 mb-3">Asignar categorías</h2>
-                <form method="POST">
-                    {% csrf_token %}
-                    <input type="hidden" name="accion" value="categorias">
-                    {{ form_categorias.categorias }}
-                    <div class="mt-3 d-flex gap-2">
-                        <button type="submit" class="btn btn-primary">Guardar categorías</button>
-                        <a href="{% url 'categorias' %}" class="btn btn-outline-secondary">Gestionar categorías</a>
-                    </div>
-                </form>
-            </div>
-        </div>
-        {% endif %}
-    </div>
+    <a class="btn btn--outline" href="{% url 'catalogo' %}">Volver al catálogo</a>
 </div>
+
+<div class="detail-grid">
+    <section class="card panel">
+        <h2>Información</h2>
+        <dl class="dl">
+            <dt>Precio</dt><dd>${{ producto.precio }}</dd>
+            <dt>Stock</dt><dd>{{ producto.stock }}</dd>
+            <dt>Proveedor</dt><dd>{{ producto.proveedor.nombre }}</dd>
+            <dt>Marca</dt><dd>{{ producto.marca }}</dd>
+            <dt>Unidad</dt><dd>{{ producto.unidad_medida }}</dd>
+            <dt>Descripción</dt><dd>{{ producto.descripcion }}</dd>
+            <dt>Categorías</dt>
+            <dd>
+                <div class="chips">
+                    {% for categoria in producto.categorias.all %}
+                    <span class="pill pill--blue">{{ categoria.nombre }}</span>
+                    {% empty %}—{% endfor %}
+                </div>
+            </dd>
+        </dl>
+    </section>
+
+    <section class="card panel">
+        <h2>Características</h2>
+        <table class="table table--compact" style="margin:-12px -16px;width:calc(100% + 32px);">
+            <tbody>
+                {% for c in producto.caracteristicas.all %}
+                <tr>
+                    <th scope="row" style="text-transform:none;letter-spacing:0;font-size:14px;">{{ c.nombre }}</th>
+                    <td>{{ c.valor }}</td>
+                    {% if request.user.is_staff %}
+                    <td style="text-align:right;">
+                        <button class="icon-btn icon-btn--danger" type="button" title="Quitar" aria-label="Quitar la característica {{ c.nombre }}"
+                                data-delete-url="{% url 'eliminar_caracteristica' c.pk %}"
+                                data-title="¿Quitar la característica {{ c.nombre }}?"
+                                data-text="Esta acción no se puede deshacer.">
+                            <svg class="icon" aria-hidden="true"><use href="#i-trash"/></svg>
+                        </button>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% empty %}
+                <tr><td class="muted">Este producto aún no tiene características.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+
+    {% if request.user.is_staff %}
+    <section class="card panel">
+        <h2>Registrar característica</h2>
+        <form method="post" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="accion" value="caracteristica">
+            {% for campo in form_caracteristica %}
+                {% include 'components/campo.html' with campo=campo %}
+            {% endfor %}
+            <button class="btn btn--primary" type="submit" style="margin-top:8px;">Agregar</button>
+        </form>
+    </section>
+
+    <section class="card panel">
+        <h2>Asignar categorías</h2>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="accion" value="categorias">
+            {{ form_categorias.categorias }}
+            <div class="form-actions" style="justify-content:flex-start;padding-top:18px;">
+                <button class="btn btn--primary" type="submit">Guardar categorías</button>
+                <a class="btn btn--outline" href="{% url 'categorias' %}">Gestionar categorías</a>
+            </div>
+        </form>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block modals %}
+{% if request.user.is_staff %}{% include 'components/modal_eliminar.html' %}{% endif %}
 {% endblock %}

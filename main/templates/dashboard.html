@@ -1,61 +1,57 @@
 {% extends 'base.html' %}
-{% load static %}
-{% block title %}Dashboard{% endblock %}
+{% block title %}Dashboard · Logistic Center{% endblock %}
 
 {% block content %}
-<main>
-    <div class="container py-4">
-        <div class="p-5 mb-4 bg-light rounded-3">
-            <div class="container-fluid py-5">
-                <h1 class="display-5 fw-bold">Dashboard</h1>
-                <p class="col-md-8 fs-4">Hola {{ request.user.username }}, Bienvenido a tu pagina principal de logistic center, aqui encontraras los servicios que tenemos para ofrecerte.</p>
-            </div>
-        </div>
+<h1 class="page-title">Hola, {{ request.user.username }}</h1>
+<p class="page-lead">Aquí encontrarás los servicios que tenemos para ofrecerte.</p>
 
-        {% if request.user.is_staff %}
-        <!--Administradores-->
-        <div class="row align-items-md-stretch mb-4">
-            <div class="col-md-12">
-                <div class="h-100 p-5 text-white bg-dark rounded-3">
-                    <h2>Usuarios y clientes</h2>
-                    <p>Registra, consulta y actualiza los datos personales y las credenciales de empleados, administradores y clientes.</p>
-                    <div class="d-flex gap-2 flex-wrap">
-                        <a class="btn btn-outline-light" href="{% url 'registro' %}">Registrar usuario</a>
-                        <a class="btn btn-outline-light" href="{% url 'listar_usuarios' %}">Lista de usuarios</a>
-                        <a class="btn btn-outline-light" href="{% url 'listar_usuarios' %}?tipo=clientes">Clientes</a>
-                    </div>
-                </div>
-            </div>
+<div class="cards" style="margin-top: 24px;">
+    {% if request.user.is_staff %}
+    <section class="card service">
+        <span class="service__icon"><svg class="icon" aria-hidden="true"><use href="#i-users"/></svg></span>
+        <h2>Empleados</h2>
+        <p>Registra, consulta y actualiza los datos personales, el cargo y las credenciales del personal de la empresa.</p>
+        <div class="service__actions">
+            <a class="btn btn--primary" href="{% url 'registrar_empleado' %}">Registrar empleado</a>
+            <a class="btn btn--outline" href="{% url 'listar_empleados' %}">Ver lista</a>
         </div>
-        {% endif %}
+    </section>
 
-        <div class="row align-items-md-stretch g-4">
-            <div class="col-md-6">
-                <div class="h-100 p-5 bg-light border rounded-3">
-                    <h2>Inventario</h2>
-                    <p>Consulta el catálogo{% if request.user.is_staff %} y gestiona proveedores, productos y categorías{% endif %}.</p>
-                    <div class="d-flex gap-2 flex-wrap">
-                        <a class="btn btn-outline-secondary" href="{% url 'catalogo' %}">Catálogo</a>
-                        {% if request.user.is_staff %}
-                        <a class="btn btn-outline-secondary" href="{% url 'listar_productos' %}">Productos</a>
-                        <a class="btn btn-outline-secondary" href="{% url 'listar_proveedores' %}">Proveedores</a>
-                        <a class="btn btn-outline-secondary" href="{% url 'categorias' %}">Categorías</a>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="h-100 p-5 bg-light border rounded-3">
-                    <h2>Ventas</h2>
-                    <p>Consulta las graficas, el balance y la contabilidad de la empresa.</p>
-                    <button class="btn btn-outline-secondary" type="button" disabled>Próximamente</button>
-                </div>
-            </div>
+    <section class="card service">
+        <span class="service__icon"><svg class="icon" aria-hidden="true"><use href="#i-user-plus"/></svg></span>
+        <h2>Clientes</h2>
+        <p>Registra, consulta y actualiza los datos de contacto, la ciudad y las credenciales de los clientes.</p>
+        <div class="service__actions">
+            <a class="btn btn--primary" href="{% url 'registrar_cliente' %}">Registrar cliente</a>
+            <a class="btn btn--outline" href="{% url 'listar_clientes' %}">Ver lista</a>
         </div>
+    </section>
+    {% endif %}
 
-        <footer class="pt-3 mt-4 text-muted border-top">
-            &copy; Logistic center S.A.S 2026
-        </footer>
-    </div>
-</main>
+    <section class="card service">
+        <span class="service__icon"><svg class="icon" aria-hidden="true"><use href="#i-box"/></svg></span>
+        <h2>Inventario</h2>
+        <p>Consulta el catálogo{% if request.user.is_staff %} y gestiona proveedores, productos y categorías{% endif %}.</p>
+        <div class="service__actions">
+            <a class="btn btn--outline" href="{% url 'catalogo' %}">Catálogo</a>
+            {% if request.user.is_staff %}
+            <a class="btn btn--outline" href="{% url 'listar_productos' %}">Productos</a>
+            <a class="btn btn--outline" href="{% url 'listar_proveedores' %}">Proveedores</a>
+            <a class="btn btn--outline" href="{% url 'categorias' %}">Categorías</a>
+            {% endif %}
+        </div>
+    </section>
+
+    <section class="card service service--soon">
+        <span class="service__icon"><svg class="icon" aria-hidden="true"><use href="#i-chart"/></svg></span>
+        <h2>Ventas</h2>
+        <div><span class="pill pill--soon">Pronto</span></div>
+        <p>Consulta las gráficas, el balance y la contabilidad de la empresa.</p>
+        <div class="service__actions">
+            <button class="btn btn--outline" type="button" disabled>Próximamente</button>
+        </div>
+    </section>
+</div>
+
+<footer class="page-foot">&copy; Logistic center S.A.S 2026</footer>
 {% endblock %}
